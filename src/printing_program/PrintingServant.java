@@ -8,48 +8,54 @@ public class PrintingServant extends UnicastRemoteObject implements PrintingServ
         super();
     }
 
-    @Override
-    public void print(String filename, String printer) throws RemoteException {
 
+    @Override
+    public String log(String message) throws RemoteException {
+        return message;
     }
 
     @Override
-    public String queue() throws RemoteException {
-        return "";
+    public String print(String filename, String printer) throws RemoteException {
+        return log("Printing " + filename + " on " + printer);
     }
 
     @Override
-    public void topQueue(String printer, int job) throws RemoteException {
-
+    public String queue(String printer) throws RemoteException {
+        return log("Queue on " + printer);
     }
 
     @Override
-    public void start() throws RemoteException {
-
+    public String topQueue(String printer, int job) throws RemoteException {
+        return log("Job " + job + " moved to the top of the queue on " + printer);
     }
 
     @Override
-    public void stop() throws RemoteException {
-
+    public String start() throws RemoteException {
+        return log("Starting printer");
     }
 
     @Override
-    public void restart() throws RemoteException {
+    public String stop() throws RemoteException {
+        return log("Stopping printer");
+    }
 
+    @Override
+    public String restart() throws RemoteException {
+        return log("Restarting printer");
     }
 
     @Override
     public String status(String printer) throws RemoteException {
-        return "";
+        return log("Status of " + printer);
     }
 
     @Override
     public String readConfig(String parameter) throws RemoteException {
-        return "";
+        return log("Reading config " + parameter);
     }
 
     @Override
-    public void setConfig(String parameter, String value) throws RemoteException {
-
+    public String setConfig(String parameter, String value) throws RemoteException {
+        return log("Setting config " + parameter + " to " + value);
     }
 }

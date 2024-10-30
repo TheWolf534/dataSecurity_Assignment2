@@ -1,5 +1,6 @@
 package printing_program;
 
+import sample_RMI_program.HelloServant;
 import sample_RMI_program.HelloService;
 
 import java.net.MalformedURLException;
@@ -9,7 +10,7 @@ import java.rmi.RemoteException;
 
 public class Client {
     public static void main(String[] args) throws MalformedURLException, NotBoundException, RemoteException {
-        HelloService service = (HelloService) Naming.lookup("rmi://localhost:1099/hello");
-        System.out.println("----" + service.echo("hey server"));
+        PrintingService service = (PrintingService) Naming.lookup("rmi://localhost:1099/printingServer");
+        System.out.println("----" + service.print("file1", "printer1"));
     }
 }
