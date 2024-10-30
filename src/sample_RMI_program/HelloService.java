@@ -1,3 +1,5 @@
+package sample_RMI_program;
+
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 

@@ -1,3 +1,5 @@
+package sample_RMI_program;
+
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 

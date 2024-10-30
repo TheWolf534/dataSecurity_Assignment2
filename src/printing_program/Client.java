@@ -1,3 +1,7 @@
+package printing_program;
+
+import sample_RMI_program.HelloService;
+
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
