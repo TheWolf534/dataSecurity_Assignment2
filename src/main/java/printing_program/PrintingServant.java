@@ -2,60 +2,85 @@ package printing_program;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.io.IOException;
 
 public class PrintingServant extends UnicastRemoteObject implements PrintingService {
-    public PrintingServant() throws RemoteException {
+    private final Authentication auth;
+
+    public PrintingServant(String credentialsPath) throws RemoteException, IOException {
         super();
+        this.auth = new Authentication(credentialsPath);
     }
 
+    // Helper method to verify token before any operation
+    private void verifyToken(String token) throws RemoteException {
+        if (token == null || !auth.validateToken(token)) {
+            throw new RemoteException("Authentication required or token invalid");
+        }
+    }
 
     @Override
-    public String log(String message) throws RemoteException {
+    public String login(String username, String password) throws RemoteException {
+        return auth.login(username, password);
+    }
+
+    @Override
+    public String log(String token, String message) throws RemoteException {
+        verifyToken(token);
         return message;
     }
 
     @Override
-    public String print(String filename, String printer) throws RemoteException {
-        return log("Printing " + filename + " on " + printer);
+    public String print(String token, String filename, String printer) throws RemoteException {
+        verifyToken(token);
+        return log(token, "Printing " + filename + " on " + printer);
     }
 
     @Override
-    public String queue(String printer) throws RemoteException {
-        return log("Queue on " + printer);
+    public String queue(String token, String printer) throws RemoteException {
+        verifyToken(token);
+        return log(token, "Queue on " + printer);
     }
 
     @Override
-    public String topQueue(String printer, int job) throws RemoteException {
-        return log("Job " + job + " moved to the top of the queue on " + printer);
+    public String topQueue(String token, String printer, int job) throws RemoteException {
+        verifyToken(token);
+        return log(token, "Job " + job + " moved to the top of the queue on " + printer);
     }
 
     @Override
-    public String start() throws RemoteException {
-        return log("Starting printer");
+    public String start(String token) throws RemoteException {
+        verifyToken(token);
+        return log(token, "Starting printer");
     }
 
     @Override
-    public String stop() throws RemoteException {
-        return log("Stopping printer");
+    public String stop(String token) throws RemoteException {
+        verifyToken(token);
+        return log(token, "Stopping printer");
     }
 
     @Override
-    public String restart() throws RemoteException {
-        return log("Restarting printer");
+    public String restart(String token) throws RemoteException {
+        verifyToken(token);
+        return log(token, "Restarting printer");
     }
 
     @Override
-    public String status(String printer) throws RemoteException {
-        return log("Status of " + printer);
+    public String status(String token, String printer) throws RemoteException {
+        verifyToken(token);
+        return log(token, "Status of " + printer);
     }
 
     @Override
-    public String readConfig(String parameter) throws RemoteException {
-        return log("Reading config " + parameter);
+    public String readConfig(String token, String parameter) throws RemoteException {
+        verifyToken(token);
+        return log(token, "Reading config " + parameter);
     }
 
     @Override
-    public String setConfig(String parameter, String value) throws RemoteException {
-        return log("Setting config " + parameter + " to " + value);
+    public String setConfig(String token, String parameter, String value) throws RemoteException {
+        verifyToken(token);
+        return log(token, "Setting config " + parameter + " to " + value);
     }
 }

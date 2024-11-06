@@ -4,14 +4,18 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 public interface PrintingService extends Remote {
-    public String log(String message) throws RemoteException;
-    public String print(String filename, String printer) throws RemoteException;
-    public String queue(String printer) throws RemoteException;
-    public String topQueue(String printer, int job) throws RemoteException;
-    public String start() throws RemoteException;
-    public String stop() throws RemoteException;
-    public String restart() throws RemoteException;
-    public String status(String printer) throws RemoteException;
-    public String readConfig(String parameter) throws RemoteException;
-    public String setConfig(String parameter, String value) throws RemoteException;
+    // Authentication method
+    String login(String username, String password) throws RemoteException;
+
+    // Modified existing methods to include token
+    String log(String token, String message) throws RemoteException;
+    String print(String token, String filename, String printer) throws RemoteException;
+    String queue(String token, String printer) throws RemoteException;
+    String topQueue(String token, String printer, int job) throws RemoteException;
+    String start(String token) throws RemoteException;
+    String stop(String token) throws RemoteException;
+    String restart(String token) throws RemoteException;
+    String status(String token, String printer) throws RemoteException;
+    String readConfig(String token, String parameter) throws RemoteException;
+    String setConfig(String token, String parameter, String value) throws RemoteException;
 }
