@@ -6,144 +6,236 @@ import java.io.IOException;
 
 public class PrintingServant extends UnicastRemoteObject implements PrintingService {
     private final Authentication auth;
+    private final Authorizator accessControl;
 
-    public PrintingServant(String credentialsPath) throws RemoteException, IOException {
+    public PrintingServant(String credentialsPath, String accessPath) throws RemoteException, IOException {
         super();
         this.auth = new Authentication(credentialsPath);
-    }
-
-    private void authenticateWithCredentials(String username, String password) throws RemoteException {
-        if (!auth.verifyPassword(username, password)) {
-            throw new RemoteException("Invalid credentials");
-        }
-    }
-
-    private void authenticateWithToken(String token) throws RemoteException {
-        if (!auth.validateToken(token)) {
-            throw new RemoteException("Invalid token");
-        }
+        this.accessControl = new Authorizator(accessPath);
     }
 
     @Override
-    public String getToken(String username, String password) throws RemoteException {
-        return auth.loginSession(username, password);
+    public Response getToken(String username, String password) throws RemoteException {
+        if (!auth.verifyPassword(username, password)) {
+            return new Response(401, "Invalid credentials");
+        }
+        String token = auth.loginSession(username, password);
+        return new Response(200, token);
     }
 
     // Print operations
     @Override
-    public String print(String username, String password, String filename, String printer) throws RemoteException {
-        System.out.println("Username: " + username + " Password: " + password);
-        authenticateWithCredentials(username, password);
-        return "Printing " + filename + " on " + printer;
+    public Response print(String username, String password, String filename, String printer) throws RemoteException {
+        if (!auth.verifyPassword(username, password)) {
+            return new Response(401, "Authentication failed");
+        }
+        if (!accessControl.isAuthorized(username, "print")) {
+            return new Response(403, "Unauthorized operation");
+        }
+        return new Response(200, "Printing " + filename + " on " + printer);
     }
 
     @Override
-    public String print(String token, String filename, String printer) throws RemoteException {
-        authenticateWithToken(token);
-        return "Printing " + filename + " on " + printer;
+    public Response print(String token, String filename, String printer) throws RemoteException {
+        if (!auth.validateToken(token)) {
+            return new Response(401, "Invalid token");
+        }
+        String username = auth.getUsernameFromToken(token);
+        if (!accessControl.isAuthorized(username, "print")) {
+            return new Response(403, "Unauthorized operation");
+        }
+        return new Response(200, "Printing " + filename + " on " + printer);
     }
 
     // Queue operations
     @Override
-    public String queue(String username, String password, String printer) throws RemoteException {
-        authenticateWithCredentials(username, password);
-        return "Queue on " + printer;
+    public Response queue(String username, String password, String printer) throws RemoteException {
+        if (!auth.verifyPassword(username, password)) {
+            return new Response(401, "Authentication failed");
+        }
+        if (!accessControl.isAuthorized(username, "queue")) {
+            return new Response(403, "Unauthorized operation");
+        }
+        return new Response(200, "Queue on " + printer);
     }
 
     @Override
-    public String queue(String token, String printer) throws RemoteException {
-        authenticateWithToken(token);
-        return "Queue on " + printer;
+    public Response queue(String token, String printer) throws RemoteException {
+        if (!auth.validateToken(token)) {
+            return new Response(401, "Invalid token");
+        }
+        String username = auth.getUsernameFromToken(token);
+        if (!accessControl.isAuthorized(username, "queue")) {
+            return new Response(403, "Unauthorized operation");
+        }
+        return new Response(200, "Queue on " + printer);
     }
 
     // TopQueue operations
     @Override
-    public String topQueue(String username, String password, String printer, int job) throws RemoteException {
-        authenticateWithCredentials(username, password);
-        return "Job " + job + " moved to the top of the queue on " + printer;
+    public Response topQueue(String username, String password, String printer, int job) throws RemoteException {
+        if (!auth.verifyPassword(username, password)) {
+            return new Response(401, "Authentication failed");
+        }
+        if (!accessControl.isAuthorized(username, "topQueue")) {
+            return new Response(403, "Unauthorized operation");
+        }
+        return new Response(200, "Job " + job + " moved to the top of the queue on " + printer);
     }
 
     @Override
-    public String topQueue(String token, String printer, int job) throws RemoteException {
-        authenticateWithToken(token);
-        return "Job " + job + " moved to the top of the queue on " + printer;
+    public Response topQueue(String token, String printer, int job) throws RemoteException {
+        if (!auth.validateToken(token)) {
+            return new Response(401, "Invalid token");
+        }
+        String username = auth.getUsernameFromToken(token);
+        if (!accessControl.isAuthorized(username, "topQueue")) {
+            return new Response(403, "Unauthorized operation");
+        }
+        return new Response(200, "Job " + job + " moved to the top of the queue on " + printer);
     }
 
     // Start operations
     @Override
-    public String start(String username, String password) throws RemoteException {
-        authenticateWithCredentials(username, password);
-        return "Starting printer";
+    public Response start(String username, String password) throws RemoteException {
+        if (!auth.verifyPassword(username, password)) {
+            return new Response(401, "Authentication failed");
+        }
+        if (!accessControl.isAuthorized(username, "start")) {
+            return new Response(403, "Unauthorized operation");
+        }
+        return new Response(200, "Starting printer");
     }
 
     @Override
-    public String start(String token) throws RemoteException {
-        authenticateWithToken(token);
-        return "Starting printer";
+    public Response start(String token) throws RemoteException {
+        if (!auth.validateToken(token)) {
+            return new Response(401, "Invalid token");
+        }
+        String username = auth.getUsernameFromToken(token);
+        if (!accessControl.isAuthorized(username, "start")) {
+            return new Response(403, "Unauthorized operation");
+        }
+        return new Response(200, "Starting printer");
     }
 
     // Stop operations
     @Override
-    public String stop(String username, String password) throws RemoteException {
-        authenticateWithCredentials(username, password);
-        return "Stopping printer";
+    public Response stop(String username, String password) throws RemoteException {
+        if (!auth.verifyPassword(username, password)) {
+            return new Response(401, "Authentication failed");
+        }
+        if (!accessControl.isAuthorized(username, "stop")) {
+            return new Response(403, "Unauthorized operation");
+        }
+        return new Response(200, "Stopping printer");
     }
 
     @Override
-    public String stop(String token) throws RemoteException {
-        authenticateWithToken(token);
-        return "Stopping printer";
+    public Response stop(String token) throws RemoteException {
+        if (!auth.validateToken(token)) {
+            return new Response(401, "Invalid token");
+        }
+        String username = auth.getUsernameFromToken(token);
+        if (!accessControl.isAuthorized(username, "stop")) {
+            return new Response(403, "Unauthorized operation");
+        }
+        return new Response(200, "Stopping printer");
     }
 
     // Restart operations
     @Override
-    public String restart(String username, String password) throws RemoteException {
-        authenticateWithCredentials(username, password);
-        return "Restarting printer";
+    public Response restart(String username, String password) throws RemoteException {
+        if (!auth.verifyPassword(username, password)) {
+            return new Response(401, "Authentication failed");
+        }
+        if (!accessControl.isAuthorized(username, "restart")) {
+            return new Response(403, "Unauthorized operation");
+        }
+        return new Response(200, "Restarting printer");
     }
 
     @Override
-    public String restart(String token) throws RemoteException {
-        authenticateWithToken(token);
-        return "Restarting printer";
+    public Response restart(String token) throws RemoteException {
+        if (!auth.validateToken(token)) {
+            return new Response(401, "Invalid token");
+        }
+        String username = auth.getUsernameFromToken(token);
+        if (!accessControl.isAuthorized(username, "restart")) {
+            return new Response(403, "Unauthorized operation");
+        }
+        return new Response(200, "Restarting printer");
     }
 
     // Status operations
     @Override
-    public String status(String username, String password, String printer) throws RemoteException {
-        authenticateWithCredentials(username, password);
-        return "Status of " + printer;
+    public Response status(String username, String password, String printer) throws RemoteException {
+        if (!auth.verifyPassword(username, password)) {
+            return new Response(401, "Authentication failed");
+        }
+        if (!accessControl.isAuthorized(username, "status")) {
+            return new Response(403, "Unauthorized operation");
+        }
+        return new Response(200, "Status of " + printer);
     }
 
     @Override
-    public String status(String token, String printer) throws RemoteException {
-        authenticateWithToken(token);
-        return "Status of " + printer;
+    public Response status(String token, String printer) throws RemoteException {
+        if (!auth.validateToken(token)) {
+            return new Response(401, "Invalid token");
+        }
+        String username = auth.getUsernameFromToken(token);
+        if (!accessControl.isAuthorized(username, "status")) {
+            return new Response(403, "Unauthorized operation");
+        }
+        return new Response(200, "Status of " + printer);
     }
 
     // ReadConfig operations
     @Override
-    public String readConfig(String username, String password, String parameter) throws RemoteException {
-        authenticateWithCredentials(username, password);
-        return "Reading config " + parameter;
+    public Response readConfig(String username, String password, String parameter) throws RemoteException {
+        if (!auth.verifyPassword(username, password)) {
+            return new Response(401, "Authentication failed");
+        }
+        if (!accessControl.isAuthorized(username, "readConfig")) {
+            return new Response(403, "Unauthorized operation");
+        }
+        return new Response(200, "Reading config " + parameter);
     }
 
     @Override
-    public String readConfig(String token, String parameter) throws RemoteException {
-        authenticateWithToken(token);
-        return "Reading config " + parameter;
+    public Response readConfig(String token, String parameter) throws RemoteException {
+        if (!auth.validateToken(token)) {
+            return new Response(401, "Invalid token");
+        }
+        String username = auth.getUsernameFromToken(token);
+        if (!accessControl.isAuthorized(username, "readConfig")) {
+            return new Response(403, "Unauthorized operation");
+        }
+        return new Response(200, "Reading config " + parameter);
     }
 
     // SetConfig operations
     @Override
-    public String setConfig(String username, String password, String parameter, String value) throws RemoteException {
-        authenticateWithCredentials(username, password);
-        return "Setting config " + parameter + " to " + value;
+    public Response setConfig(String username, String password, String parameter, String value) throws RemoteException {
+        if (!auth.verifyPassword(username, password)) {
+            return new Response(401, "Authentication failed");
+        }
+        if (!accessControl.isAuthorized(username, "setConfig")) {
+            return new Response(403, "Unauthorized operation");
+        }
+        return new Response(200, "Setting config " + parameter + " to " + value);
     }
 
     @Override
-    public String setConfig(String token, String parameter, String value) throws RemoteException {
-        authenticateWithToken(token);
-        return "Setting config " + parameter + " to " + value;
+    public Response setConfig(String token, String parameter, String value) throws RemoteException {
+        if (!auth.validateToken(token)) {
+            return new Response(401, "Invalid token");
+        }
+        String username = auth.getUsernameFromToken(token);
+        if (!accessControl.isAuthorized(username, "setConfig")) {
+            return new Response(403, "Unauthorized operation");
+        }
+        return new Response(200, "Setting config " + parameter + " to " + value);
     }
 }

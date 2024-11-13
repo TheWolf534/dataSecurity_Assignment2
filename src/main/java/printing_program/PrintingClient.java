@@ -19,15 +19,34 @@ public class PrintingClient {
             PrintingClient client = new PrintingClient();
 
             // Login first
-            String username = "user1";
-            String password = "password";
-            String token = client.service.getToken(username, password);
-            // Then perform operations
-            String result = client.service.print(username, password, "document.pdf", "printer1");
-            System.out.println("----" + result);
+            String username = "Alice";
+            String password = "Alicepassword";
+            Response tokenResponse = client.service.getToken(username, password);
+
+            if (tokenResponse.getStatusCode() != 200) {
+                System.out.println("Error: " + tokenResponse.getMessage());
+                return;
+            }
+
+            String token = tokenResponse.getMessage(); // The token is in the message for successful login
+
+            // Try printing with username/password
+            Response printResponse = client.service.print(username, password, "document.pdf", "printer1");
+            System.out.println("Print Status: " + printResponse.getStatusCode());
+            System.out.println("Print Message: " + printResponse.getMessage());
+
             sleep(10000);
-            result = client.service.queue(token, "printer1");
-            System.out.println("----" + result);
+
+            // Try queue with token
+            Response queueResponse = client.service.queue(token, "printer1");
+            System.out.println("Queue Status: " + queueResponse.getStatusCode());
+            System.out.println("Queue Message: " + queueResponse.getMessage());
+
+            // Try unauthorized operation
+            Response topQueueResponse = client.service.topQueue("Fred", "Fredpassword", "printer1", 1);
+            System.out.println("TopQueue Status: " + topQueueResponse.getStatusCode());
+            System.out.println("TopQueue Message: " + topQueueResponse.getMessage());
+
         } catch (Exception e) {
             System.err.println("Client exception: " + e.getMessage());
             e.printStackTrace();

@@ -9,6 +9,7 @@ import io.jsonwebtoken.security.Keys;
 import javax.crypto.SecretKey;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.security.Key;
 import java.util.ArrayList;
@@ -16,12 +17,14 @@ import java.util.Date;
 import java.util.List;
 
 public class Authentication {
-    private final String[][] userCredentials;
+    private String[][] userCredentials;
     private static final SecretKey SECRET_KEY = Jwts.SIG.HS256.key().build();;
     private static final long TOKEN_VALIDITY = 10 * 1000; // 10 seconds
+    private final String credentialsPath;
 
     public Authentication(String path) throws IOException {
-        userCredentials = loadCredentials(path);
+        credentialsPath = path;
+        userCredentials = loadCredentials(credentialsPath);
     }
 
     public String[][] loadCredentials(String filePath) throws IOException {
@@ -37,9 +40,35 @@ public class Authentication {
 
         return lines.toArray(new String[0][]);
     }
+    // Write credentials to file
+    public void setCredentials() {
+        try {
+            FileWriter writer = new FileWriter(credentialsPath);
+            for (String[] row : userCredentials) {
+                writer.write(String.join(",", row) + "\n");
+            }
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public String hashPlaintext(String password) {
         return BCrypt.withDefaults().hashToString(12, password.toCharArray());
+    }
+
+    public void addUser(String user, String password) {
+        if (findUserPassword(user) != null) {
+            return;
+        }
+
+        String hashedPassword = hashPlaintext(password);
+        String[] newUser = {user, hashedPassword};
+        String[][] newCredentials = new String[userCredentials.length + 1][2];
+        System.arraycopy(userCredentials, 0, newCredentials, 0, userCredentials.length);
+        newCredentials[userCredentials.length] = newUser;
+        userCredentials = newCredentials;
+        setCredentials();
     }
 
     public String findUserPassword(String user) {
