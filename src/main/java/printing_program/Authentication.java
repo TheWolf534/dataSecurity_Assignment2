@@ -90,10 +90,11 @@ public class Authentication {
     }
 
     // Combined login method that returns JWT token
-    public String login(String username, String password) {
+    public String loginSession(String username, String password) {
         if (verifyPassword(username, password)) {
             return generateToken(username);
         }
         return null;
     }
 }
+
