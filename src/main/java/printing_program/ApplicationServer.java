@@ -10,6 +10,6 @@ import java.rmi.registry.Registry;
 public class ApplicationServer {
     public static void main(String[] args) throws IOException {
         Registry registry = LocateRegistry.createRegistry(1099);
-        registry.rebind("PrintService", new PrintingServant("./src/main/java/printing_program/passwords.txt", "./src/main/java/printing_program/AccessControlList.txt"));
+        registry.rebind("PrintService", new PrintingServant("./src/main/java/printing_program/Credentials.txt", "./src/main/java/printing_program/RoleHierarchy.txt", "./src/main/java/printing_program/RoleGroups.txt"));
     }
 }

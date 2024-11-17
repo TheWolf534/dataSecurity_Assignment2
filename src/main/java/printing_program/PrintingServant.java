@@ -8,10 +8,10 @@ public class PrintingServant extends UnicastRemoteObject implements PrintingServ
     private final Authentication auth;
     private final Authorizator accessControl;
 
-    public PrintingServant(String credentialsPath, String accessPath) throws RemoteException, IOException {
+    public PrintingServant(String credentialsPath, String hierarchyPath, String groupPath) throws RemoteException, IOException {
         super();
         this.auth = new Authentication(credentialsPath);
-        this.accessControl = new Authorizator(accessPath);
+        this.accessControl = new Authorizator(hierarchyPath, groupPath);
     }
 
     @Override

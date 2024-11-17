@@ -1,4 +1,7 @@
-manager,Alice
-servicetechnician,Bob
-poweruser,Cecilia
-user,David,Erica,Fred,George
+Cecilia,powerUser
+Bob,
+George,user,serviceTechnician
+Alice,manager
+David,user
+Fred,user
+Erica,user

@@ -1,20 +1,27 @@
 package printing_program;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 public class Authorizator {
-    private final HashMap<String, String[]> accessControlList;
+    private final HashMap<String, String[]> RoleHirarchy;
+    private final HashMap<String, String[]> RoleGroups;
 
-    public Authorizator(String path) throws IOException {
-        accessControlList = loadAccessControlList(path);
+    private final String hirarchyPath;
+    private final String groupsPath;
+
+    public Authorizator(String hierarchyPath, String groupsPath) throws IOException {
+        this.hirarchyPath = hierarchyPath;
+        RoleHirarchy = loadAccessFile(this.hirarchyPath);
+
+        this.groupsPath = groupsPath;
+        RoleGroups = loadAccessFile(this.groupsPath);
     }
 
-    private HashMap<String, String[]> loadAccessControlList(String filePath) throws IOException {
+    private HashMap<String, String[]> loadAccessFile(String filePath) throws IOException {
         HashMap<String, String[]> accessControlList = new HashMap<>();
 
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
@@ -32,11 +39,64 @@ public class Authorizator {
         return accessControlList;
     }
 
+    public void addRole(String role, String user) {
+        String[] userRoles = RoleGroups.get(user);
+        if (userRoles == null) {
+            userRoles = new String[1];
+            userRoles[0] = role;
+        } else {
+            String[] newUserRoles = new String[userRoles.length + 1];
+            System.arraycopy(userRoles, 0, newUserRoles, 0, userRoles.length);
+            newUserRoles[userRoles.length] = role;
+            userRoles = newUserRoles;
+        }
+        RoleGroups.put(user, userRoles);
+        setRoleGroups();
+    }
+
+    public void removeRole(String role, String user) {
+        String[] userRoles = RoleGroups.get(user);
+        if (userRoles == null) {
+            return;
+        }
+
+        String[] newUserRoles = new String[userRoles.length - 1];
+        int j = 0;
+        for (String userRole : userRoles) {
+            if (!userRole.equals(role)) {
+                newUserRoles[j] = userRole;
+                j++;
+            }
+        }
+        RoleGroups.put(user, newUserRoles);
+        setRoleGroups();
+    }
+
+    public void setRoleGroups() {
+        try {
+            FileWriter writer = new FileWriter(groupsPath);
+            for (String user : RoleGroups.keySet()) {
+                writer.write(user + "," + String.join(",", RoleGroups.get(user)) + "\n");
+            }
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public boolean isAuthorized(String user, String method) {
-        String[] accessibleMethods = accessControlList.get(user);
-        if (accessibleMethods == null) {
+        List<String[]> accessibleMethodsList = new ArrayList<>();
+        String[] role = RoleGroups.get(user);
+
+        for (String r :role){
+            accessibleMethodsList.add(RoleHirarchy.get(r));
+        }
+        if (accessibleMethodsList == null) {
             return false;
         }
+        String[] accessibleMethods = accessibleMethodsList.stream()
+                .flatMap(Arrays::stream)
+                .toArray(String[]::new);
 
         for (String accessibleMethod : accessibleMethods) {
             if (accessibleMethod.equals(method)) {

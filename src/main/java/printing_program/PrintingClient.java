@@ -35,7 +35,7 @@ public class PrintingClient {
             System.out.println("Print Status: " + printResponse.getStatusCode());
             System.out.println("Print Message: " + printResponse.getMessage());
 
-            sleep(10000);
+            //sleep(10000);
 
             // Try queue with token
             Response queueResponse = client.service.queue(token, "printer1");
@@ -46,6 +46,21 @@ public class PrintingClient {
             Response topQueueResponse = client.service.topQueue("Fred", "Fredpassword", "printer1", 1);
             System.out.println("TopQueue Status: " + topQueueResponse.getStatusCode());
             System.out.println("TopQueue Message: " + topQueueResponse.getMessage());
+
+            // Try authorized operation
+            Response topQueueResponse2 = client.service.topQueue( "Bob", "Bobapassword", "printer1", 1);
+            System.out.println("TopQueue Status: " + topQueueResponse2.getStatusCode());
+            System.out.println("TopQueue Message: " + topQueueResponse2.getMessage());
+
+            // Try authorized operation
+            Response topQueueResponse3 = client.service.queue( "George", "Georgepassword", "printer1");
+            System.out.printf("TopQueue Status: %d\n", topQueueResponse3.getStatusCode());
+            System.out.printf("TopQueue Message: %s\n", topQueueResponse3.getMessage());
+
+            // Try authorized operation
+            Response topQueueResponse4 = client.service.restart( "George", "Georgepassword");
+            System.out.printf("Restart Status: %d\n", topQueueResponse4.getStatusCode());
+            System.out.printf("Restart Message: %s\n", topQueueResponse4.getMessage());
 
         } catch (Exception e) {
             System.err.println("Client exception: " + e.getMessage());

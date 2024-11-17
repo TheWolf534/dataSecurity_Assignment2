@@ -71,6 +71,19 @@ public class Authentication {
         setCredentials();
     }
 
+    public void removeUser(String user) {
+        for (int i = 0; i < userCredentials.length; i++) {
+            if (userCredentials[i][0].equals(user)) {
+                String[][] newCredentials = new String[userCredentials.length - 1][2];
+                System.arraycopy(userCredentials, 0, newCredentials, 0, i);
+                System.arraycopy(userCredentials, i + 1, newCredentials, i, userCredentials.length - i - 1);
+                userCredentials = newCredentials;
+                setCredentials();
+                return;
+            }
+        }
+    }
+
     public String findUserPassword(String user) {
         for (String[] row : userCredentials) {
             if (row[0].equals(user)) {
