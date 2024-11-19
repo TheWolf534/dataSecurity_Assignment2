@@ -54,7 +54,13 @@ public class Authorizator {
         setRoleGroups();
     }
 
-    public void removeRole(String role, String user) {
+    public void removeRole(String role, String user, boolean removeUser) {
+        if (removeUser) {
+            RoleGroups.remove(user);
+            setRoleGroups();
+            return;
+        }
+
         String[] userRoles = RoleGroups.get(user);
         if (userRoles == null) {
             return;
